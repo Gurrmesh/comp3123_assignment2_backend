@@ -8,6 +8,7 @@ const employeeSchema = new Schema({
   salary: Number,
   date_of_joining: Date,
   department: String,
+  profile_picture: String,
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });

@@ -20,7 +20,7 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ status: false, message: 'Missing required employee fields' });
     }
 
-    const employee = await Employee.create({
+    const employeeData = {
       first_name,
       last_name,
       email,
@@ -28,7 +28,14 @@ exports.create = async (req, res, next) => {
       salary,
       date_of_joining,
       department
-    });
+    };
+
+    // Add profile picture if uploaded
+    if (req.file) {
+      employeeData.profile_picture = `/uploads/${req.file.filename}`;
+    }
+
+    const employee = await Employee.create(employeeData);
 
     return res.status(201).json({
       message: 'Employee created successfully.',
@@ -56,9 +63,16 @@ exports.update = async (req, res, next) => {
   try {
     const { eid } = req.params;
 
+    const updateData = { ...req.body, updated_at: new Date() };
+
+    // Add profile picture if uploaded
+    if (req.file) {
+      updateData.profile_picture = `/uploads/${req.file.filename}`;
+    }
+
     const employee = await Employee.findByIdAndUpdate(
       eid,
-      { ...req.body, updated_at: new Date() },
+      updateData,
       { new: true }
     );
 
@@ -85,6 +99,32 @@ exports.remove = async (req, res, next) => {
     }
 
     return res.status(200).json({ message: 'Employee deleted successfully.' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.search = async (req, res, next) => {
+  try {
+    const { department, position } = req.query;
+
+    if (!department && !position) {
+      return res.status(400).json({
+        status: false,
+        message: 'Please provide at least one search criteria: department or position'
+      });
+    }
+
+    const query = {};
+    if (department) {
+      query.department = { $regex: department, $options: 'i' };
+    }
+    if (position) {
+      query.position = { $regex: position, $options: 'i' };
+    }
+
+    const employees = await Employee.find(query).sort({ created_at: -1 });
+    return res.status(200).json(employees);
   } catch (err) {
     next(err);
   }
