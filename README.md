@@ -81,5 +81,4 @@ git push -u origin main
 ## Postman Tests
 - Test the APIs using the endpoints above; attach `jwt_token` in Authorization header `Bearer <token>` if used.
 
-## Contact
-If you need help with deployment or connecting the frontend, reach out with specific errors and I can help troubleshoot.
+
